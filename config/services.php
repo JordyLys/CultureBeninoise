@@ -36,8 +36,8 @@ return [
     ],
 
     'fedapay' => [
-    'public' => env('FEDAPAY_PUBLIC'),
-    'secret' => env('FEDAPAY_SECRET'),
+    'public' => env('FEDAPAY_PUBLIC_KEY_SANDBOX'),
+    'secret' => env('FEDAPAY_SECRET_KEY_SANDBOX'),
 ],
 
 ];

@@ -4,17 +4,17 @@ namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Contenu;
 use App\Models\Region;
 use App\Models\Langue;
 use App\Models\User;
 use App\Models\TypeContenu;
-use App\Models\Media;
 
 class ContenusFrontController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche la liste des contenus
      */
     public function index()
     {
@@ -26,7 +26,7 @@ class ContenusFrontController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Formulaire de création d'un contenu (admin)
      */
     public function create()
     {
@@ -35,11 +35,11 @@ class ContenusFrontController extends Controller
         $langues = Langue::all();
         $typesContenu = TypeContenu::all();
 
-        return view('front.contenus.create', compact('users', 'regions', 'langues', 'typesContenu'));
+        return view('admin.contenus.create', compact('users', 'regions', 'langues', 'typesContenu'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Stocke un nouveau contenu
      */
     public function store(Request $request)
     {
@@ -60,7 +60,6 @@ class ContenusFrontController extends Controller
 
         $contenu = new Contenu($request->all());
 
-        // Gestion du fichier
         if ($request->hasFile('fichier')) {
             $file = $request->file('fichier');
             $filename = time().'_'.preg_replace('/\s+/', '_', $file->getClientOriginalName());
@@ -74,66 +73,77 @@ class ContenusFrontController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Affiche un contenu spécifique
      */
     public function show($id)
 {
-    $user = auth()->user();
-    $contenu = Contenu::findOrFail($id);
+    $contenu = Contenu::with(['media', 'typeContenu', 'langue', 'region', 'commentaires.user'])->findOrFail($id);
 
-    $abonnement = $user->abonnements()
-                        ->where(function($q){
-                            $q->whereNull('date_fin')
-                              ->orWhere('date_fin', '>=', now());
-                        })
-                        ->latest()
-                        ->first();
+    // Vérifier si l'utilisateur est connecté
+    if (Auth::check()) {
+        $user = Auth::user();
 
-    if($abonnement) {
-        // si abonnement limité en nombre de contenus
-        if($abonnement->contenus_max && $abonnement->contenus_lus >= $abonnement->contenus_max) {
-            return redirect()->route('front.abonnement.show', $contenu->id)
-                             ->with('info', 'Votre abonnement est terminé. Veuillez renouveler.');
+        // Si admin → accès direct
+        if ($user->role === 'admin') {
+            return view('front.contenu', compact('contenu'));
         }
 
-        // si contenu déjà consulté, ne pas compter
-        $deja_consulte = $user->contenu_abonnement()->where('contenu_id', $contenu->id)->exists();
-        if(!$deja_consulte) {
-            // marquer comme consulté
-            $user->contenu_abonnement()->create(['contenu_id' => $contenu->id]);
-            if($abonnement->contenus_max) {
-                $abonnement->increment('contenus_lus');
+        // Utilisateur connecté non admin → vérifier abonnement
+        $abonnement = $user->abonnements()
+                            ->where(function($q){
+                                $q->whereNull('date_fin')
+                                  ->orWhere('date_fin', '>=', now());
+                            })
+                            ->latest()
+                            ->first();
+
+        if ($abonnement) {
+            // Limite de contenus
+            if ($abonnement->contenus_max && $abonnement->contenus_lus >= $abonnement->contenus_max) {
+                return redirect()->route('front.abonnement.show', $contenu->id)
+                                 ->with('info', 'Votre abonnement est terminé. Veuillez renouveler.');
             }
+
+            // Marquer contenu comme consulté si pas déjà fait
+            $deja_consulte = $user->contenu_abonnement()->where('contenu_id', $contenu->id)->exists();
+            if (!$deja_consulte) {
+                $user->contenu_abonnement()->create(['contenu_id' => $contenu->id]);
+                if ($abonnement->contenus_max) {
+                    $abonnement->increment('contenus_lus');
+                }
+            }
+
+            return view('front.contenu', compact('contenu'));
         }
 
-        return view('front.contenu', compact('contenu'));
+        // Pas d'abonnement actif
+        return redirect()->route('front.abonnement.show', $contenu->id)
+                         ->with('info', 'Veuillez souscrire un abonnement pour voir ce contenu.');
     }
 
-    // aucun abonnement actif
+    // Non connecté → rediriger vers abonnement (paiement)
     return redirect()->route('front.abonnement.show', $contenu->id)
                      ->with('info', 'Veuillez souscrire un abonnement pour voir ce contenu.');
 }
 
-    public function section($slug)
-{
-    $contenus = Contenu::whereHas('typeContenu', function ($q) use ($slug) {
-        $q->where('nom', $slug); // remplacer slug par nom
-    })
-    ->with(['media', 'langue', 'region', 'typeContenu'])
-    ->paginate(12);
-
-    return view('front.sections', compact('contenus', 'slug'));
-}
-
 
     /**
-     * Show the form for editing the specified resource.
+     * Affiche les contenus d'une section
      */
-    public function typeContenu()
-{
-    return $this->belongsTo(TypeContenu::class, 'idTypeContenu');
-}
+    public function section($slug)
+    {
+        $contenus = Contenu::whereHas('typeContenu', function ($q) use ($slug) {
+            $q->where('nom', $slug);
+        })
+        ->with(['media', 'langue', 'region', 'typeContenu'])
+        ->paginate(12);
 
+        return view('front.sections', compact('contenus', 'slug'));
+    }
+
+    /**
+     * Formulaire d'édition
+     */
     public function edit($id)
     {
         $contenu = Contenu::findOrFail($id);
@@ -146,7 +156,7 @@ class ContenusFrontController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Met à jour un contenu
      */
     public function update(Request $request, $id)
     {
@@ -179,10 +189,6 @@ class ContenusFrontController extends Controller
             $file->move(public_path('uploads/contenus'), $filename);
             $contenu->fichier = $filename;
         }
-        if ($request->filled('password')) {
-    $user->password = Hash::make($request->password);
-}
-
 
         $contenu->save();
 
@@ -190,7 +196,7 @@ class ContenusFrontController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprime un contenu
      */
     public function destroy($id)
     {

@@ -3,96 +3,123 @@
 namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use FedaPay\FedaPay;
 use FedaPay\Transaction;
+use Illuminate\Http\Request;
 
 class AbonnementController extends Controller
 {
+    /**
+     * Affiche la page d’abonnement
+     */
     public function show($id)
     {
         return view('front.abonnement', compact('id'));
     }
 
+    /**
+     * Lancement du paiement
+     */
     public function payer(Request $request)
     {
-        try {
-            $offre = $request->input('offre');
+        $request->validate([
+            'offre' => 'required|in:100f,500f,1000f,2500f',
+        ]);
 
-            // Définir le montant et la description selon l'offre
-            switch ($offre) {
-                case '100f':
-                    $amount = 100;
-                    $description = 'Abonnement Culture Béninoise - 3 contenus';
-                    $duration = 1; // 1 utilisation
-                    break;
-                case '500f':
-                    $amount = 500;
-                    $description = 'Abonnement Culture Béninoise - 3 jours accès complet';
-                    $duration = 3; // 3 jours
-                    break;
-                case '1000f':
-                    $amount = 1000;
-                    $description = 'Abonnement Culture Béninoise - 1 semaine accès complet';
-                    $duration = 7; // 7 jours
-                    break;
-                case '2500f':
-                    $amount = 2500;
-                    $description = 'Abonnement Culture Béninoise - 1 mois accès complet';
-                    $duration = 30; // 30 jours
-                    break;
-                default:
-                    return redirect()->back()->with('error', 'Offre invalide');
-            }
+        $offre = $request->offre;
 
-            /** 1. Clé API live */
-            FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY_SANDBOX'));
-            FedaPay::setEnvironment('production');
+        // Définition des offres
+        $offres = [
+            '100f'  => ['amount' => 100,  'desc' => '3 contenus',    'jours' => 30, 'max' => 3],
+            '500f'  => ['amount' => 500,  'desc' => 'Accès 3 jours',  'jours' => 3,  'max' => null],
+            '1000f' => ['amount' => 1000, 'desc' => 'Accès 7 jours',  'jours' => 7,  'max' => null],
+            '2500f' => ['amount' => 2500, 'desc' => 'Accès 30 jours', 'jours' => 30, 'max' => null],
+        ];
 
-            /** 2. Créer la transaction */
-            $transaction = Transaction::create([
-                'amount' => $amount,
-                'description' => $description,
-                'currency' => ['iso' => 'XOF'],
-                'callback_url' => route('front.abonnement.callback', ['id' => $request->id]),
-            ]);
+        $conf = $offres[$offre];
 
-            /** 3. Redirection vers FedaPay */
-            return redirect()->away($transaction->payment_url);
+        // Stockage sécurisé en session
+        session([
+            'abonnement_en_cours' => [
+                'offre'      => $offre,
+                'jours'      => $conf['jours'],
+                'contenus_max'=> $conf['max'],
+                'user_id'    => auth()->id(),
+                'contenu_id' => $request->id,
+            ],
+        ]);
 
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur : ' . $e->getMessage());
+        // Configuration FedaPay
+        FedaPay::setApiKey(config('services.fedapay.secret'));
+        FedaPay::setEnvironment('sandbox');
+
+        // Création transaction
+        //dd(config('services.fedapay.secret'));
+        $transaction = Transaction::create([
+            'amount'       => $conf['amount'],
+            'currency'     => ['iso' => 'XOF'],
+            'description'  => 'Abonnement Culture Béninoise - '.$conf['desc'],
+            'callback_url' => 'https://unstupefied-antonina-scissile.ngrok-free.dev/abonnement/callback',
+            'return_url'   => 'https://unstupefied-antonina-scissile.ngrok-free.dev/abonnement.success',
+        ]);
+       // dd($transaction);
+
+        return redirect()->away($transaction->payment_url);
+
+    }
+
+    /**
+     * CALLBACK FedaPay (serveur → serveur)
+     */
+    public function callback(Request $request)
+    {
+        \Log::info('FedaPay Callback', $request->all());
+
+        FedaPay::setApiKey(config('services.fedapay.secret'));
+        FedaPay::setEnvironment('sandbox');
+
+        if (! $request->transaction_id) {
+            \Log::error('Transaction ID manquant');
+            return response()->json(['error' => 'missing transaction id'], 400);
         }
+
+        $transaction = Transaction::retrieve($request->transaction_id);
+
+        if ($transaction->status !== 'approved') {
+            \Log::warning('Paiement non validé', ['status' => $transaction->status]);
+            return response()->json(['status' => 'not approved'], 200);
+        }
+
+        // Paiement validé
+        return response()->json(['status' => 'success'], 200);
     }
 
-   public function callback(Request $request)
-{
-    $user = auth()->user();
-    $offre = $request->input('offre'); // envoyer via callback si possible
+    /**
+     * RETOUR UTILISATEUR APRÈS PAIEMENT
+     */
+    public function success()
+    {
+        $data = session('abonnement_en_cours');
 
-    // Définir durée et max contenus
-    $data = [
-        '100f'  => ['contenus_max' => 3,   'jours' => 30], // durée arbitraire ou infinie
-        '500f'  => ['contenus_max' => null,'jours' => 3],
-        '1000f' => ['contenus_max' => null,'jours' => 7],
-        '2500f' => ['contenus_max' => null,'jours' => 30],
-    ];
+        if (! $data) {
+            return redirect()->route('home')->with('error', 'Session expirée');
+        }
 
-    if(!isset($data[$offre])){
-        return redirect()->route('front.abonnement.show', $request->id)
-                         ->with('error', 'Offre invalide');
+        $user = auth()->user();
+
+        $user->abonnements()->create([
+            'type'        => $data['offre'],
+            'contenus_max'=> $data['contenus_max'],
+            'contenus_lus'=> 0,
+            'date_debut'  => now(),
+            'date_fin'    => now()->addDays($data['jours']),
+        ]);
+
+        $contenuId = $data['contenu_id'];
+        session()->forget('abonnement_en_cours');
+
+        return redirect()
+            ->route('front.contenu.show', ['id' => $contenuId])
+            ->with('success', 'Paiement effectué avec succès');
     }
-
-    $abonnement = $user->abonnements()->create([
-        'type' => $offre,
-        'contenus_max' => $data[$offre]['contenus_max'],
-        'contenus_lus' => 0,
-        'date_debut' => now(),
-        'date_fin' => $data[$offre]['jours'] ? now()->addDays($data[$offre]['jours']) : null,
-    ]);
-
-    return redirect()->route('front.contenu.show', $request->id)
-                     ->with('success', 'Paiement réussi !');
-}
-
 }

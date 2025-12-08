@@ -41,16 +41,15 @@ Route::get('/contenus/section/{slug}', [ContenusFrontController::class, 'section
     ->name('front.contenus.section');
 
 
-// Abonnement
-Route::get('/abonnement', function () {
-    $id = null; // valeur par défaut
-    return view('front.abonnement', compact('id'));
-})->name('front.abonnement');
+
 
 // Routes abonnement avec controller
 Route::get('/abonnement/{id}', [AbonnementController::class, 'show'])->name('front.abonnement.show');
 Route::post('/abonnement/payer', [AbonnementController::class, 'payer'])->name('front.abonnement.payer');
 Route::get('/abonnement/callback', [AbonnementController::class, 'callback'])->name('front.abonnement.callback');
+  // Retour utilisateur après paiement réussi
+Route::get('/abonnement/success', [AbonnementController::class, 'success'])->name('front.abonnement.success');
+
 
 // Contenus front
 Route::get('/contenus', [ContenusFrontController::class, 'index'])->name('front.contenus.index');

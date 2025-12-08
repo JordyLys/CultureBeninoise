@@ -4,7 +4,7 @@ use App\Http\Controllers\front\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\front\CommentairesFrontController;
 
-use App\Http\Controllers\front\ContenusFrontController;
+use App\Http\Controllers\admin\ContenusController;
 
 
 Route::middleware('auth')->group(function () {
@@ -30,11 +30,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/contenu/{id}/commentaire', [CommentairesFrontController::class, 'store'])->name('front.commentaire.store');
 
-      Route::get('contenus/create', [ContenusController::class, 'create'])->name('contenus.create');
-    Route::post('contenus', [ContenusController::class, 'store'])->name('contenus.store');
-    Route::get('contenus/{id}/edit', [ContenusController::class, 'edit'])->name('contenus.edit');
-    Route::put('contenus/{id}', [ContenusController::class, 'update'])->name('contenus.update');
-    Route::delete('contenus/{id}', [ContenusController::class, 'destroy'])->name('contenus.destroy');
+      Route::get('contenus/create', [ContenusController::class, 'create'])->name('front.contenus.create');
+    Route::post('contenus', [ContenusController::class, 'store'])->name('front.contenus.store');
+    Route::get('contenus/{id}/edit', [ContenusController::class, 'edit'])->name('front.contenus.edit');
+    Route::put('contenus/{id}', [ContenusController::class, 'update'])->name('front.contenus.update');
+    Route::delete('contenus/{id}', [ContenusController::class, 'destroy'])->name('front.contenus.destroy');
 
 });
 

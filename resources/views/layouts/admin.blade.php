@@ -206,9 +206,6 @@
                 <a href="{{ route('home') }}"
                     class="sidebar-link {{ request()->routeIs('acceuil') ? 'active' : '' }}"><i
                         class="bi bi-house-fill"></i><span>Accueil</span></a>
-                <a href="{{ route('front.abonnement') }}"
-                    class="sidebar-link {{ request()->routeIs('abonnement') ? 'active' : '' }}"><i
-                        class="bi bi-card-list"></i><span>Mon Abonnement</span></a>
 
                 <a class="sidebar-link" data-bs-toggle="collapse" href="#generalSubmenu"><i
                         class="bi bi-list-ul"></i><span>Généralités</span></a>
@@ -253,10 +250,7 @@
                 <a href="{{ route('home') }}"
                     class="sidebar-link {{ request()->routeIs('acceuil') ? 'active' : '' }}"><i
                         class="bi bi-house-fill"></i><span>Accueil</span></a>
-                <a href="{{ route('front.abonnement') }}"
-                    class="sidebar-link {{ request()->routeIs('abonnement') ? 'active' : '' }}"><i
-                        class="bi bi-card-list"></i><span>Mon Abonnement</span></a>
-                <a href="{{ route('front.contenus.index') }}"
+                 <a href="{{ route('front.contenus.index') }}"
                     class="sidebar-link {{ request()->routeIs('contenus.*') ? 'active' : '' }}"><i
                         class="bi bi-file-earmark-text-fill"></i><span>Contenus</span></a>
             @endif
