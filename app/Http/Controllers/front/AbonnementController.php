@@ -46,7 +46,7 @@ class AbonnementController extends Controller
             }
 
             /** 1. Clé API live */
-            FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY_LIVE'));
+            FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY_SANDBOX'));
             FedaPay::setEnvironment('production');
 
             /** 2. Créer la transaction */
