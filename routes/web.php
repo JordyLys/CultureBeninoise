@@ -45,3 +45,23 @@ require __DIR__.'/front.php';
 Route::post('/theme-toggle', [App\Http\Controllers\ThemeController::class, 'toggle'])
 ->name('theme.toggle');
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/run-typemedia-seeder', function () {
+
+    // Sécurité minimale
+    if (app()->environment('production') === false) {
+        abort(403);
+    }
+
+    Artisan::call('db:seed', [
+        '--class' => 'Database\\Seeders\\TypeMediaSeeder',
+        '--force' => true, // indispensable en production
+    ]);
+
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'TypeMediaSeeder exécuté avec succès'
+    ]);
+});
