@@ -65,10 +65,14 @@
         "@php artisan package:discover --ansi"
     ],
     "post-install-cmd": [
-        "@php artisan key:generate --force",
-        "@php artisan migrate --force"
+        "@php artisan key:generate --force"
+
+    ],
+    "post-deploy":[
+        "php artisan migrate --force && php artisan db:seed --force"
     ]
-    },
+},
+
     "extra": {
         "laravel": {
             "dont-discover": []

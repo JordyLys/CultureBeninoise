@@ -49,20 +49,34 @@ Route::post('/theme-toggle', [App\Http\Controllers\ThemeController::class, 'togg
 
 
 
-Route::get('/run-typemedia-seeder', function () {
 
-    // Sécurité minimale
-    if (app()->environment('production') === false) {
-        abort(403);
+
+// Vérification DB
+Route::get('/db-check', function() {
+    try {
+        // Test connexion
+        DB::connection()->getPdo();
+
+        // Compter les tables
+        $tables = DB::select('SHOW TABLES');
+
+        // Compter les lignes
+        $counts = [];
+        foreach ($tables as $table) {
+            $tableName = $table->{'Tables_in_' . env('DB_DATABASE')};
+            $counts[$tableName] = DB::table($tableName)->count();
+        }
+
+        return response()->json([
+            'connected' => true,
+            'tables_count' => count($tables),
+            'data_counts' => $counts,
+            'needs_seeding' => array_sum($counts) === 0
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'connected' => false,
+            'error' => $e->getMessage()
+        ], 500);
     }
-
-    Artisan::call('db:seed', [
-        '--class' => 'Database\\Seeders\\TypeMediaSeeder',
-        '--force' => true, // indispensable en production
-    ]);
-
-    return response()->json([
-        'status' => 'OK',
-        'message' => 'TypeMediaSeeder exécuté avec succès'
-    ]);
 });
