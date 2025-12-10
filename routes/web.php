@@ -8,37 +8,38 @@ use App\Http\Controllers\front\CommentairesFrontController;
 use App\Http\Controllers\admin\ContenusController;
 
 // ==================== ROUTE ULTRA SIMPLE ====================
-Route::get('/seed-now', function () {
-    echo "<h1>🌱 Exécution des Seeders</h1>";
-    echo "<pre>";
-
-    try {
-        // 1. Vérifier la connexion DB
-        DB::connection()->getPdo();
-        echo "✅ Connexion DB OK\n\n";
-
-        // 2. Exécuter les seeders (SIMPLE)
-        Artisan::call('db:seed', ['--force' => true]);
-        echo "✅ Seeders exécutés\n\n";
-
-        // 3. Montrer le résultat
-        $tables = DB::select('SHOW TABLES');
-        echo "📊 Résultat :\n";
-        foreach ($tables as $table) {
-            $tableName = $table->{'Tables_in_' . env('DB_DATABASE')};
-            $count = DB::table($tableName)->count();
-            echo "- $tableName : $count lignes\n";
-        }
-
-        echo "\n🎉 TERMINÉ ! Supprimez cette route après.";
-
-    } catch (Exception $e) {
-        echo "❌ ERREUR : " . $e->getMessage();
+Route::get('/init-db-now', function () {
+    $token = request()->query('t');
+    
+    // Changez ce mot de passe
+    if ($token !== 'MonSuperSecret2024!') {
+        return response('<h1>Accès refusé</h1>', 403);
     }
-
-    echo "</pre>";
+    
+    $output = "<h1>Initialisation de la base de données</h1>";
+    $output .= "<pre>";
+    
+    // Migrations
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        $output .= "✅ Migrations OK\n";
+    } catch (\Exception $e) {
+        $output .= "❌ Erreur migrations: " . $e->getMessage() . "\n";
+    }
+    
+    // Seeders
+    try {
+        Artisan::call('db:seed', ['--force' => true]);
+        $output .= "✅ Seeders OK\n";
+    } catch (\Exception $e) {
+        $output .= "❌ Erreur seeders: " . $e->getMessage() . "\n";
+    }
+    
+    $output .= "</pre>";
+    $output .= "<p><strong>N'oubliez pas de supprimer cette route après usage!</strong></p>";
+    
+    return $output;
 });
-
 
 
 Route::middleware('auth')->group(function () {
