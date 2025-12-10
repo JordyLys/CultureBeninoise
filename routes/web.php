@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\front\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\front\CommentairesFrontController;
 
 use App\Http\Controllers\admin\ContenusController;
@@ -45,8 +46,8 @@ require __DIR__.'/front.php';
 Route::post('/theme-toggle', [App\Http\Controllers\ThemeController::class, 'toggle'])
 ->name('theme.toggle');
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
+
+
 
 Route::get('/run-typemedia-seeder', function () {
 
