@@ -64,13 +64,12 @@
         "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
         "@php artisan package:discover --ansi"
     ],
+      "post-deploy": "php artisan migrate --force && php artisan db:seed --force",
     "post-install-cmd": [
         "@php artisan key:generate --force"
 
-    ],
-  //  "post-deploy":[
-    //    "php artisan migrate --force && php artisan db:seed --force"
-    //]
+    ]
+
 },
 
     "extra": {
