@@ -1,9 +1,0 @@
-{
-  "scripts": {
-    "start": "sh start-app.sh"
-  },
-  "healthcheck": {
-    "path": "/health.php",
-    "timeout": 120
-  }
-}
