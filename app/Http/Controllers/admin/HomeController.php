@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    function edit($id){
-        return view('langues.edit',compact('id'));
-    }
+
 }

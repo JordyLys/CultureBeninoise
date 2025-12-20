@@ -1,1 +1,1 @@
-<?php http_response_code(200); echo "OK";
+<?php http_response_code(200); echo "healthy";

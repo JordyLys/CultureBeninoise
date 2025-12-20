@@ -4,5 +4,5 @@ buildCommand = "cp .env.example .env 2>/dev/null || touch .env && composer insta
 
 [deploy]
 startCommand = "chmod +x start.sh && ./start.sh"
-healthcheckPath = "/health.php"  # ← IMPORTANT !
+healthcheckPath = "/health.php"  # Doit correspondre au dashboard
 healthcheckTimeout = 60
