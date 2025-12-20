@@ -13,15 +13,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-         if (
-        app()->environment('production') &&
-        Schema::hasTable('type_media') &&
-        \DB::table('type_media')->count() === 0
-    ) {
-        Artisan::call('db:seed', [
-            '--force' => true
-        ]);
-    }
+        //
+
     }
 
     /**
