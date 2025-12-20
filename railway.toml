@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cp .env.example .env 2>/dev/null || touch .env && composer install --ignore-platform-reqs --no-scripts --optimize-autoloader"
+
+[deploy]
+startCommand = "chmod +x start.sh && ./start.sh"
+healthcheckPath = "/"
+healthcheckTimeout = 100

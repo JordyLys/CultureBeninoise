@@ -62,11 +62,11 @@
         ],
         "post-autoload-dump": [
         "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-        "@php artisan package:discover --no-interaction"
+        "@php artisan package:discover --ansi"
     ],
       "post-deploy": "php artisan migrate --force && php artisan db:seed --force",
     "post-install-cmd": [
-        "@php artisan key:generate --no-interaction"
+        "Illuminate\\Foundation\\ComposerScripts::postInstall"
 
     ]
 
