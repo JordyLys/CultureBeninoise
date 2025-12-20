@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('parler', function (Blueprint $table) {
-            $table->foreignId('idRegion')->constrained(table: 'regions',indexName: 'parler_idRegion');
-            $table->foreignId('idLangue')->constrained(table: 'langues',indexName: 'parler_idLangue');
+            $table->foreignId('idRegion')->constrained(table: 'regions',indexName: 'parler_idRegion')->onDelete('cascade');
+            $table->foreignId('idLangue')->constrained(table: 'langues',indexName: 'parler_idLangue')->onDelete('cascade');
             $table->primary(['idRegion', 'idLangue']);
             $table->timestamps();
         });

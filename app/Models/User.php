@@ -64,9 +64,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Langue::class, 'idLangue');
     }
-    public function abonnements()
+public function contenu_abonnement()
 {
-    return $this->hasMany(Abonnement::class);
+    // Relation pour suivre les contenus achetés/spécifiques
+    return $this->hasMany(ContenuAbonnement::class, 'user_id');
+}
+
+public function abonnements()
+{
+    return $this->hasMany(Abonnement::class, 'user_id');
 }
 
 }

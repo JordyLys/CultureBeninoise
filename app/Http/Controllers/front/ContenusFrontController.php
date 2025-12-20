@@ -75,57 +75,19 @@ class ContenusFrontController extends Controller
     /**
      * Affiche un contenu spécifique
      */
-    public function show($id)
+   public function show($id)
 {
-    $contenu = Contenu::with(['media', 'typeContenu', 'langue', 'region', 'commentaires.user'])->findOrFail($id);
+    // Récupérer le contenu
+    $contenu = Contenu::with(['media', 'typeContenu'])->findOrFail($id);
 
-    // Vérifier si l'utilisateur est connecté
-    if (Auth::check()) {
-        $user = Auth::user();
-
-        // Si admin → accès direct
-        if ($user->role === 'admin') {
-            return view('front.contenu', compact('contenu'));
-        }
-
-        // Utilisateur connecté non admin → vérifier abonnement
-        $abonnement = $user->abonnements()
-                            ->where(function($q){
-                                $q->whereNull('date_fin')
-                                  ->orWhere('date_fin', '>=', now());
-                            })
-                            ->latest()
-                            ->first();
-
-        if ($abonnement) {
-            // Limite de contenus
-            if ($abonnement->contenus_max && $abonnement->contenus_lus >= $abonnement->contenus_max) {
-                return redirect()->route('front.abonnement.show', $contenu->id)
-                                 ->with('info', 'Votre abonnement est terminé. Veuillez renouveler.');
-            }
-
-            // Marquer contenu comme consulté si pas déjà fait
-            $deja_consulte = $user->contenu_abonnement()->where('contenu_id', $contenu->id)->exists();
-            if (!$deja_consulte) {
-                $user->contenu_abonnement()->create(['contenu_id' => $contenu->id]);
-                if ($abonnement->contenus_max) {
-                    $abonnement->increment('contenus_lus');
-                }
-            }
-
-            return view('front.contenu', compact('contenu'));
-        }
-
-        // Pas d'abonnement actif
-        return redirect()->route('front.abonnement.show', $contenu->id)
-                         ->with('info', 'Veuillez souscrire un abonnement pour voir ce contenu.');
+    // (Optionnel) log admin
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        \Log::info('Admin access granted', ['contenu_id' => $id]);
     }
 
-    // Non connecté → rediriger vers abonnement (paiement)
-    return redirect()->route('front.abonnement.show', $contenu->id)
-                     ->with('info', 'Veuillez souscrire un abonnement pour voir ce contenu.');
+    // ACCÈS LIBRE AU CONTENU
+    return view('front.contenu', compact('contenu'));
 }
-
 
     /**
      * Affiche les contenus d'une section
@@ -211,3 +173,4 @@ class ContenusFrontController extends Controller
         return redirect()->route('front.contenus.index')->with('success', 'Contenu supprimé avec succès.');
     }
 }
+

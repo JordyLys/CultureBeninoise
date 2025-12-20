@@ -20,12 +20,12 @@ return new class extends Migration
             $table->string('password')->nullable(false);
             $table->string('sexe')->check("sexe='féminin' or sexe='masculin'");
             $table->string('statut')->default('actif');
-            $table->string('photo');
+            $table->string('photo')->nullable();
             $table->date('dateNaissance');
             $table->date('dateInscription')->useCurrent()->nullable(false);;
-            $table->foreignId('idRole')->constrained(table: 'roles',indexName: 'users_idRole');
-            $table->foreignId('idLangue')->constrained(table: 'langues',indexName: 'users_idLangue');
-            
+            $table->foreignId('idRole')->constrained(table: 'roles',indexName: 'users_idRole')->onDelete('cascade');
+            $table->foreignId('idLangue')->nullable()->constrained(table: 'langues',indexName: 'users_idLangue')->onDelete('cascade');
+
             $table->rememberToken();
             $table->timestamps();
         });

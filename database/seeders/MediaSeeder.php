@@ -4,66 +4,36 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Media;
-use App\Models\Contenu;
 
 class MediaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Définir les médias à assigner spécifiquement
-        $mediasSpecifiques = [
-            1  => 'danxome.jpg',
-            2  => 'agbanlin.jpg',
-            6  => 'sakpata.jpg',
-            12 => 'zangbeto.jpg',
-            13 => 'amiwo.jpg',
+        $medias = [
+            ['idContenu' => 1, 'fichier' => 'danxome.jpg', 'type' => 1],
+            ['idContenu' => 2, 'fichier' => 'te_agbanlin_conte.mp4', 'type' => 2],
+            ['idContenu' => 3, 'fichier' => 'sakpata.jpg', 'type' => 1],
+            ['idContenu' => 4, 'fichier' => 'wassa_wassa.mp4', 'type' => 2],
+            ['idContenu' => 5, 'fichier' => 'fete_gaani.mp4', 'type' => 2],
+            ['idContenu' => 6, 'fichier' => 'tam tam.jpg', 'type' => 1],
+            ['idContenu' => 7, 'fichier' => 'rituel.jpg', 'type' => 1],
+            ['idContenu' => 8, 'fichier' => 'roi.jpg', 'type' => 1],
+            ['idContenu' => 9, 'fichier' => 'zangbéto.jpg', 'type' => 1],
+            ['idContenu' => 10, 'fichier' => 'amiwo.jpg', 'type' => 1],
+            ['idContenu' => 11, 'fichier' => 'agodjie.mp4', 'type' => 2],
+            ['idContenu' => 12, 'fichier' => 'foret.jpg', 'type' => 1],
+            ['idContenu' => 13, 'fichier' => 'yogbo.jpeg', 'type' => 1],
+            ['idContenu' => 14, 'fichier' => 'sauceMan.jpg', 'type' => 1],
+            ['idContenu' => 15, 'fichier' => 'kouvito.jpg', 'type' => 1],
         ];
 
-        // Autres images restantes pour compléter les 15 médias
-        $autresImages = [
-            'chevaux.jpg',
-            'ouidah.jpg',
-            'bio_guera.jpg',
-            'porto.jpg',
-            'kouvitoo.jpg',
-            'atassii.jpg',
-            'agodjie.jpg',
-            'nonRetour.jpg',
-            'mur.jpg',
-            'sauceMan.jpg',
-            'kouvito.jpg',
-        ];
-
-        // Récupère tous les contenus existants
-        $contenus = Contenu::all();
-
-        $compteur = 0;
-
-        foreach ($contenus as $contenu) {
-
-            // Si ce contenu a un média spécifique, on l'assigne
-            if (isset($mediasSpecifiques[$contenu->id])) {
-                Media::create([
-                    'chemin' => 'adminlte/img/' . $mediasSpecifiques[$contenu->id],
-                    'description' => 'Media associé au contenu ' . $contenu->id,
-                    'idTypeMedia' => 1,
-                    'idContenu' => $contenu->id,
-                ]);
-                $compteur++;
-            }
-            // Sinon on prend la prochaine image disponible dans la liste
-            elseif (!empty($autresImages) && $compteur < 15) {
-                $image = array_shift($autresImages);
-                Media::create([
-                    'chemin' => 'adminlte/img/' . $image,
-                    'description' => 'Media associé au contenu ' . $contenu->id,
-                    'idTypeMedia' => 1,
-                    'idContenu' => $contenu->id,
-                ]);
-                $compteur++;
-            }
-
-            if ($compteur >= 15) break; // Limite à 15 médias
+        foreach ($medias as $media) {
+            Media::create([
+                'chemin' => 'adminlte/img/' . $media['fichier'],
+                'description' => 'Media associé au contenu ' . $media['idContenu'],
+                'idTypeMedia' => $media['type'],
+                'idContenu' => $media['idContenu'],
+            ]);
         }
     }
 }

@@ -38,6 +38,8 @@ return [
     'fedapay' => [
     'public' => env('FEDAPAY_PUBLIC_KEY_SANDBOX'),
     'secret' => env('FEDAPAY_SECRET_KEY_SANDBOX'),
+    'callback_url' => env('APP_URL') . '/abonnement/callback',
+    'return_url' => env('APP_URL') . '/abonnement/success',
 ],
 
 ];

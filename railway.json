@@ -1,5 +1,9 @@
 {
   "build": {
-    "php": "8.3"
+    "php": "8.3",
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "php artisan migrate --force && php artisan db:seed --force && php artisan serve"
   }
 }

@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('commentaire', function (Blueprint $table) {
             $table->id();
             $table->text('texte')->nullable(false);
-            $table->integer('note')->default(00);
+            $table->integer('note')->nullable()->default(00);
             $table->date('dateCommentaire')->useCurrent()->nullable(false);;
-            $table->foreignId('idUsers')->constrained(table: 'users',indexName: 'commentaire_idUsers')->nullable(false);
-            $table->foreignId('idContenu')->constrained(table: 'contenus',indexName: 'commentaire_idContenu')->nullable(false);
+            $table->foreignId('idUsers')->nullable(false)->constrained(table: 'users',indexName: 'commentaire_idUsers')->onDelete('cascade');
+            $table->foreignId('idContenu')->nullable(false)->constrained(table: 'contenus',indexName: 'commentaire_idContenu')->onDelete('cascade');
             $table->timestamps();
         });
     }

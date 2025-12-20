@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->id();
             $table->string('chemin')->nullable(false);
-            $table->string('description');
-            $table->foreignId('idTypeMedia')->constrained(table: 'type_media',indexName: 'media_idTypeMedia');
-            $table->foreignId('idContenu')->constrained(table: 'contenus',indexName: 'media_idContenu')->nullable(false);
+            $table->string('description')->nullable();
+            $table->foreignId('idTypeMedia')->constrained(table: 'type_media',indexName: 'media_idTypeMedia')->onDelete('cascade');
+            $table->foreignId('idContenu')->nullable(false)->constrained(table: 'contenus',indexName: 'media_idContenu')->onDelete('cascade');
             $table->timestamps();
         });
     }

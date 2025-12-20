@@ -17,12 +17,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
-        /*User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);*/
          $this->call([
             // 1. Rôles et références de base
             RoleSeeder::class,
@@ -37,7 +32,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
 
             // 4. Contenus (doivent avoir auteurs, langues, régions, type de contenu)
-            ContenusSeeder::class,
+            ContenuSeeder::class,
 
             // 5. Médias (doivent avoir contenus et type média)
             MediaSeeder::class,
