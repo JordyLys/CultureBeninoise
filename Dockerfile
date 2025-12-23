@@ -1,8 +1,8 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
-# Installer extensions PHP et outils système
+# Dépendances système
 RUN apt-get update && apt-get install -y \
-    git unzip libzip-dev libpng-dev libonig-dev libxml2-dev zip nginx \
+    git unzip libzip-dev libpng-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
 # Installer Composer
@@ -11,15 +11,15 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-RUN php artisan storage:link
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
+# Installer dépendances Laravel
+RUN composer install --no-interaction --prefer-dist
 
-# Copier configuration Nginx
-COPY nginx.conf /etc/nginx/sites-available/default
+# Préparer Laravel
+RUN php artisan storage:link || true
+RUN php artisan optimize:clear
 
-EXPOSE 8080
+# Script de démarrage
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
-CMD ["sh", "-c", "nginx && php-fpm"]
+CMD ["/start.sh"]
