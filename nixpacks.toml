@@ -1,0 +1,6 @@
+[phases.setup]
+cmds = ["echo 'Using CUSTOM Dockerfile configuration'"]
+
+[start]
+cmd = "docker-start"
+type = "dockerfile"
