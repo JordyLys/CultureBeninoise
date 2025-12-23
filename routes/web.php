@@ -12,6 +12,8 @@ use App\Http\Controllers\admin\ContenusController;
 use App\Http\Controllers\ThemeController;
 
 
+
+use App\Models\Media;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
@@ -199,6 +201,50 @@ Route::get('/seed-users-direct', function () {
     return response()->json([
         'status' => 'OK',
         'message' => 'Seed exécuté directement depuis la route'
+    ]);
+});
+
+
+Route::get('/seed-medias-direct', function () {
+
+    // 🔐 Sécurité minimale
+    if (app()->environment('production')) {
+        abort(403, 'Accès interdit');
+    }
+
+    $medias = [
+        ['idContenu' => 1, 'fichier' => 'danxome.jpg', 'type' => 1],
+        ['idContenu' => 2, 'fichier' => 'te_agbanlin_conte.mp4', 'type' => 2],
+        ['idContenu' => 3, 'fichier' => 'sakpata.jpg', 'type' => 1],
+        ['idContenu' => 4, 'fichier' => 'wassa_wassa.mp4', 'type' => 2],
+        ['idContenu' => 5, 'fichier' => 'fete_gaani.mp4', 'type' => 2],
+        ['idContenu' => 6, 'fichier' => 'tam tam.jpg', 'type' => 1],
+        ['idContenu' => 7, 'fichier' => 'rituel.jpg', 'type' => 1],
+        ['idContenu' => 8, 'fichier' => 'roi.jpg', 'type' => 1],
+        ['idContenu' => 9, 'fichier' => 'zangbéto.jpg', 'type' => 1],
+        ['idContenu' => 10, 'fichier' => 'amiwo.jpg', 'type' => 1],
+        ['idContenu' => 11, 'fichier' => 'agodjie.mp4', 'type' => 2],
+        ['idContenu' => 12, 'fichier' => 'foret.jpg', 'type' => 1],
+        ['idContenu' => 13, 'fichier' => 'yogbo.jpeg', 'type' => 1],
+        ['idContenu' => 14, 'fichier' => 'sauceMan.jpg', 'type' => 1],
+        ['idContenu' => 15, 'fichier' => 'kouvito.jpg', 'type' => 1],
+    ];
+
+    foreach ($medias as $media) {
+        // Evite doublons
+        Media::firstOrCreate(
+            ['chemin' => 'adminlte/img/' . $media['fichier']],
+            [
+                'description' => 'Media associé au contenu ' . $media['idContenu'],
+                'idTypeMedia' => $media['type'],
+                'idContenu' => $media['idContenu'],
+            ]
+        );
+    }
+
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'Medias seedés directement depuis la route'
     ]);
 });
 
