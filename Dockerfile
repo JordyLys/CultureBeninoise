@@ -11,12 +11,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-# Installer dépendances Laravel
+# Installer dépendances PHP
 RUN composer install --no-interaction --prefer-dist
 
-# Préparer Laravel
+# Préparer Laravel (SANS DB)
 RUN php artisan storage:link || true
-RUN php artisan optimize:clear
 
 # Script de démarrage
 COPY start.sh /start.sh
