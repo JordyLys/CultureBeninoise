@@ -1,6 +1,6 @@
-[phases.setup]
-cmds = ["echo 'Using CUSTOM Dockerfile configuration'"]
+[build]
+builder = "dockerfile"
 
-[start]
-cmd = "docker-start"
-type = "dockerfile"
+[deploy]
+startCommand = "apache2-foreground"
+
