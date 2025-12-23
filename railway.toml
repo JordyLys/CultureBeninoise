@@ -1,8 +1,8 @@
 [build]
-builder = "nixpacks"
-buildCommand = "composer install --no-dev --optimize-autoloader"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "chmod +x start.sh && ./start.sh"
+startCommand = ""
 healthcheckPath = "/"
 healthcheckTimeout = 300

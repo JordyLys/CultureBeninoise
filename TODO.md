@@ -14,6 +14,7 @@
 - [x] Updated dev dependencies to Laravel 11 compatible versions.
 
 ## Next Steps
+- [x] Run composer update to update lock file with Laravel 11 packages.
 - [ ] Commit and push changes to repository.
-- [ ] Redeploy on Railway to apply new composer.json.
+- [ ] Redeploy on Railway to apply new composer.json and lock file.
 - [ ] Verify deployment succeeds without errors.
