@@ -11,6 +11,11 @@ use App\Http\Controllers\front\CommentairesFrontController;
 use App\Http\Controllers\admin\ContenusController;
 use App\Http\Controllers\ThemeController;
 
+
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+
+
 Route::get('/', function(Request $request) {
     // Si c'est une redirection depuis FedaPay
     if ($request->has('status') && $request->has('id')) {
@@ -116,3 +121,84 @@ Route::get('/admin/deploy-run', function() {
 
     return '<pre>' . implode("\n\n", $output) . '</pre>';
 })->name('deploy.run');
+
+Route::get('/seed-users-direct', function () {
+
+    // 🔐 Sécurité minimale (OBLIGATOIRE)
+    if (app()->environment('production')) {
+        abort(403, 'Accès interdit');
+    }
+
+    // --- UTILISATEURS ---
+    User::create([
+        'nom' => 'ZOUGOUI',
+        'prenom' => 'Junior',
+        'password' => Hash::make('Azerty12'),
+        'email' => 'zouzou@gmail.com',
+        'sexe' => 'masculin',
+        'dateNaissance' => '2005-04-12',
+        'idRole' => 4,
+        'idLangue' => 3
+    ]);
+
+    User::create([
+        'nom' => 'ATCHAOUE',
+        'prenom' => 'Jordy',
+        'password' => Hash::make('Abcd12'),
+        'email' => 'jordyatchaoue@gmail.com',
+        'sexe' => 'féminin',
+        'dateNaissance' => '2007-04-14',
+        'idRole' => 1,
+        'idLangue' => 1
+    ]);
+
+    User::create([
+        'nom' => 'COMLAN',
+        'prenom' => 'Maurice',
+        'password' => Hash::make('Eneam123'),
+        'email' => 'maurice.comlan@uac.bj',
+        'sexe' => 'masculin',
+        'dateNaissance' => '1979-04-17',
+        'idRole' => 1,
+        'idLangue' => 4
+    ]);
+
+    User::create([
+        'nom' => 'AGOSSOU',
+        'prenom' => 'Rebecca',
+        'password' => Hash::make('Pass123'),
+        'email' => 'rebecca.agossou@example.com',
+        'sexe' => 'féminin',
+        'dateNaissance' => '2002-09-02',
+        'idRole' => 3,
+        'idLangue' => 6
+    ]);
+
+    User::create([
+        'nom' => 'KPOSSOU',
+        'prenom' => 'Rodrigue',
+        'password' => Hash::make('Test123'),
+        'email' => 'rodrigue.kpossou@example.com',
+        'sexe' => 'masculin',
+        'dateNaissance' => '2000-01-22',
+        'idRole' => 2,
+        'idLangue' => 1
+    ]);
+
+    User::create([
+        'nom' => 'SODOKIN',
+        'prenom' => 'Mireille',
+        'password' => Hash::make('Test123'),
+        'email' => 'mireille.sodokin@example.com',
+        'sexe' => 'féminin',
+        'dateNaissance' => '1998-05-05',
+        'idRole' => 5,
+        'idLangue' => 2
+    ]);
+
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'Seed exécuté directement depuis la route'
+    ]);
+});
+
