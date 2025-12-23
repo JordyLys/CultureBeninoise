@@ -1,5 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "🚀 Laravel starting on port 8080"
+PORT=${PORT:-8080}
+echo "🚀 Laravel starting on port $PORT"
 
-php artisan serve --host=0.0.0.0 --port=8080
+# Utilisez le serveur PHP intégré au lieu de artisan serve
+php -S 0.0.0.0:$PORT -t public
