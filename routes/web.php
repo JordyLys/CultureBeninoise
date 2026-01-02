@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
 
+Route::get('/', function () {
+    return response('OK', 200);
+});
+
 Route::get('/', function(Request $request) {
     // Si c'est une redirection depuis FedaPay
     if ($request->has('status') && $request->has('id')) {
