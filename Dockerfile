@@ -28,11 +28,7 @@ COPY . .
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Optimisations Laravel
-RUN php artisan storage:link || true \
-    && php artisan config:clear \
-    && php artisan config:cache \
-    && php artisan view:clear \
-    && php artisan view:cache
+RUN php artisan storage:link || true
 
 # Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
