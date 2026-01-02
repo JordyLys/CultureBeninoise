@@ -1,39 +1,46 @@
 FROM php:8.2-apache
 
-# Extensions PHP pour Laravel
+# Extensions PHP nécessaires à Laravel
 RUN apt-get update && apt-get install -y \
     libzip-dev libpng-dev libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql zip gd
+    && docker-php-ext-install pdo pdo_mysql zip gd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Apache pour Railway - CONFIGURATION CRITIQUE
+# Activer rewrite
 RUN a2enmod rewrite
-# Force Apache à utiliser le PORT de Railway
-RUN echo 'Listen ${PORT}' > /etc/apache2/ports.conf
-RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
-RUN sed -i 's/:80/:${PORT}/g' /etc/apache2/sites-available/*.conf
 
-# Définir le document root sur 'public'
+# Définir le DocumentRoot Laravel
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf \
+    /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
 
-# Composer
+# Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Code
+# Copier le code
 COPY . .
 
-# Dépendances
+# Installer dépendances PHP
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Laravel setup
+# Optimisations Laravel
 RUN php artisan storage:link || true \
+    && php artisan config:clear \
     && php artisan config:cache \
+    && php artisan view:clear \
     && php artisan view:cache
 
 # Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# COMMANDE DE DÉMARRAGE EXPLICITE
-CMD ["apache2-foreground"]
+# Port exposé (Railway injecte $PORT)
+EXPOSE 80
+
+# Démarrage Apache avec port Railway
+CMD sed -i "s/80/${PORT}/g" /etc/apache2/ports.conf \
+ && sed -i "s/:80/:${PORT}/g" /etc/apache2/sites-available/*.conf \
+ && apache2-foreground
